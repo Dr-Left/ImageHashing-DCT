@@ -22,11 +22,29 @@ int build_hash_table(int img[N][N], int hash_table[M],
                     hash_value =
                         (hash_value * 256 + img[x + i][y + j]) % MODP;
             }
-            if (hash_table[hash_value] != 0) cnt_conflict++;
+            if (hash_table[hash_value] != 0) {
+                cnt_conflict++;
+                while (hash_table[hash_value] != 0) {
+                    hash_value = (hash_value + 1) % MODP;
+                }
+            }
             hash_table[hash_value] = x * N + y + 1;
         }
     }
     return cnt_conflict;
+}
+
+bool element_wise_cmp(int query_img[N][N], pair<int, int> pos) {
+    int i = pos.first;
+    int j = pos.second;
+    for (int x = 0; x < M; x++) {
+        for (int y = 0; x < M; x++) {
+            if (query_img[x][y] != img[i + x][j + y]) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 pair<int, int> query(int query_img[N][N], pair<int, int> size) {
@@ -43,7 +61,8 @@ pair<int, int> query(int query_img[N][N], pair<int, int> size) {
             if (hash_table[hash_value] != 0) {
                 int x0 = (hash_table[hash_value] - 1) / N;
                 int y0 = (hash_table[hash_value] - 1) % N;
-                return make_pair(x0, y0);
+                if (element_wise_cmp(query_img, make_pair(x0, y0)))
+                    return make_pair(x0, y0);
             }
         }
     }
