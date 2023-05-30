@@ -103,14 +103,19 @@ int main(int argc, char *argv[]) {
     }
     // calculate the total manhatten diffrence
     int total_diff = 0;
+    int faults = 0;
     for (int i = 0; i <= MAX_QUERIES; i++) {
         int x1, y1, x2, y2;
         ifs1 >> x1 >> y1;
         ifs2 >> x2 >> y2;
-        total_diff += abs(x1 - x2) + abs(y1 - y2);
+        if (x1 == -1 && y1 == -1)
+            faults++;
+        else
+            total_diff += abs(x1 - x2) + abs(y1 - y2);
     }
     cout << "Total manhatten diffrence between my result and answer: "
          << total_diff << endl;
+    cout << "Total faults: " << faults << endl;
 
     return 0;
 }
