@@ -1,4 +1,5 @@
 #include <chrono>
+#include <fstream>
 
 #include "my_io.cpp"
 
@@ -79,15 +80,18 @@ int main() {
 
     auto end_time = chrono::high_resolution_clock::now();
 
-    auto duration = chrono::duration_cast<chrono::milliseconds>(
+    auto duration = chrono::duration_cast<chrono::microseconds>(
         end_time - start_time);
 
     printf("Hash table created.\n");
-    printf("    time: %lld ms\n", duration.count());
+    printf("    time: %lld us\n", duration.count());
     printf("    conflicts: %d\n", cnt_conflict);
 
     FILE* my_result_file;
     my_result_file = fopen((dir_path + "my_result.txt").c_str(), "w");
+
+    // timing
+    start_time = chrono::high_resolution_clock::now();
 
     for (int i = 0; i <= MAX_QUERIES; i++) {
         int query_img[N][N];
@@ -101,7 +105,32 @@ int main() {
                    pos.first);  // x is the line, y is the column
         fprintf(my_result_file, "%d %d\n", pos.second, pos.first);
     }
+    fclose(my_result_file);
 
-    // save_to_file(img, dir_path + "query0_g_copy.data", size);
+    end_time = chrono::high_resolution_clock::now();
+    duration = chrono::duration_cast<chrono::microseconds>(end_time -
+                                                           start_time);
+    printf("Queries finished.\n");
+    printf("    average time: %lld us\n",
+           duration.count() / (MAX_QUERIES + 1));
+
+    // compare result
+    ifstream ifs1, ifs2;
+    ifs1.open(dir_path + "/my_result.txt", ios::in);
+    ifs2.open(dir_path + "/result.txt", ios::in);
+    if (!ifs1.is_open() || !ifs2.is_open()) {
+        cout << "Error opening result file. End result comparing" << endl;
+        exit(1);
+    }
+    // calculate the total manhatten diffrence
+    int total_diff = 0;
+    for (int i = 0; i <= MAX_QUERIES; i++) {
+        int x1, y1, x2, y2;
+        ifs1 >> x1 >> y1;
+        ifs2 >> x2 >> y2;
+        total_diff += abs(x1 - x2) + abs(y1 - y2);
+    }
+    cout << "Total manhatten diffrence between my result and answer: "
+         << total_diff << endl;
     return 0;
 }
